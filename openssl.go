@@ -1,4 +1,4 @@
-package openssl // import "github.com/Luzifer/go-openssl"
+package openssl // import "github.com/VestaCentral/go-openssl"
 
 import (
 	"bytes"
@@ -52,20 +52,18 @@ func (o *OpenSSL) DecryptString(passphrase, encryptedBase64String string) ([]byt
 	if err != nil {
 		return nil, err
 	}
-	return o.decrypt(creds.key, creds.iv, data)
+	return o.Decrypt(creds.key, creds.iv, data)
 }
 
-func (o *OpenSSL) decrypt(key, iv, data []byte) ([]byte, error) {
-	if len(data) == 0 || len(data)%aes.BlockSize != 0 {
-		return nil, fmt.Errorf("bad blocksize(%v), aes.BlockSize = %v\n", len(data), aes.BlockSize)
-	}
+func (o *OpenSSL) Decrypt(key, iv, data []byte) ([]byte, error) {
+
 	c, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
 	}
 	cbc := cipher.NewCBCDecrypter(c, iv)
-	cbc.CryptBlocks(data[aes.BlockSize:], data[aes.BlockSize:])
-	out, err := o.pkcs7Unpad(data[aes.BlockSize:], aes.BlockSize)
+	cbc.CryptBlocks(data, data)
+	out, err := o.pkcs7Unpad(data, aes.BlockSize)
 	if out == nil {
 		return nil, err
 	}
